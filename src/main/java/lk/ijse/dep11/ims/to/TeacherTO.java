@@ -15,8 +15,7 @@ import java.io.Serializable;
 @AllArgsConstructor
 public class TeacherTO implements Serializable {
 
-    @Null(message = "Id should be null",groups = Create.class)
-    @NotNull(message = "ID should not be null",groups = Update.class)
+    @Null(message = "Id should be null")
     private Integer id;
     @NotNull(message = "Name should not be empty")
     @Pattern(regexp = "[a-zA-Z ]+")
@@ -25,6 +24,4 @@ public class TeacherTO implements Serializable {
     @Pattern(regexp = "\\d{3}-\\d{7}")
     private String contact;
 
-    public interface Create extends Default {}  //CREATE
-    public interface Update extends Default {}  //UPDATE
 }

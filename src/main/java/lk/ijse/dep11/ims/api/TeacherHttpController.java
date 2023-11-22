@@ -9,7 +9,9 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
 import javax.annotation.PreDestroy;
+import javax.validation.Valid;
 import java.sql.*;
+import java.util.LinkedList;
 import java.util.List;
 
 @RestController
@@ -37,7 +39,7 @@ public class TeacherHttpController {
 
     @ResponseStatus(HttpStatus.CREATED)
     @PostMapping(produces = "application/json" ,consumes = "application/json")
-    public TeacherTO createTeacher(@RequestBody @Validated(TeacherTO.Create.class) TeacherTO teacher){
+    public TeacherTO createTeacher(@RequestBody @Valid TeacherTO teacher){
         try (Connection connection = pool.getConnection()) {
             PreparedStatement createStm = connection.prepareStatement("INSERT INTO teacher(name, contact) VALUES (?,?)", Statement.RETURN_GENERATED_KEYS);
             createStm.setString(1,teacher.getName());
@@ -55,7 +57,7 @@ public class TeacherHttpController {
 
     @ResponseStatus(HttpStatus.NO_CONTENT)
     @PatchMapping(value = "/{teacherId}", consumes = "application/json")
-    public void updateTeacher(@RequestBody @Validated(TeacherTO.Update.class) TeacherTO teacher,
+    public void updateTeacher(@RequestBody @Valid TeacherTO teacher,
                               @PathVariable int teacherId){
         try (Connection connection = pool.getConnection()) {
             PreparedStatement updateStm = connection.prepareStatement("SELECT * FROM teacher WHERE id = ?");
@@ -115,6 +117,19 @@ public class TeacherHttpController {
     @ResponseStatus(HttpStatus.OK)
     @GetMapping(produces = "application/json")
     public List<TeacherTO> getAllTeachers(){
-        return null;
+        try (Connection connection = pool.getConnection()) {
+            Statement statement = connection.createStatement();
+            ResultSet rst = statement.executeQuery("SELECT * FROM teacher ORDER BY id");
+            List<TeacherTO> teachersList = new LinkedList<>();
+            while (rst.next()){
+                int id = rst.getInt("id");
+                String name = rst.getString("name");
+                String contact = rst.getString("contact");
+                teachersList.add(new TeacherTO(id,name,contact));
+            }
+            return teachersList;
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
     }
 }
