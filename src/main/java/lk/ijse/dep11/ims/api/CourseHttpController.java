@@ -7,5 +7,5 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping("/courses")
 @CrossOrigin
-public class CourceHttpController {
+public class CourseHttpController {
 }
