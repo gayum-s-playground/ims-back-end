@@ -92,9 +92,24 @@ public class TeacherHttpController {
 
     @ResponseStatus(HttpStatus.OK)
     @GetMapping(value = "/{teacherId}", produces = "application/json")
-    public TeacherTO getTeacherDetail(@PathVariable String teacherId){
-
-        return null;
+    public TeacherTO getTeacherDetail(@PathVariable int teacherId){
+        try (Connection connection = pool.getConnection()) {
+            PreparedStatement preparedStatement = connection.prepareStatement("SELECT * FROM teacher WHERE id=?");
+            preparedStatement.setInt(1,teacherId);
+            TeacherTO teacher;
+            ResultSet rst = preparedStatement.executeQuery();
+            if(!rst.next()){
+                throw new ResponseStatusException(HttpStatus.NOT_FOUND,"Teacher was not found.");
+            }else {
+                int id = rst.getInt("id");
+                String name = rst.getString("name");
+                String contact = rst.getString("contact");
+                teacher = new TeacherTO(id, name, contact);
+            }
+            return teacher;
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     @ResponseStatus(HttpStatus.OK)
